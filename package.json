@@ -1,0 +1,28 @@
+{
+  "name": "node_udp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "concurrently \"tsc --watch\" \"nodemon -q dist/server.js\"",
+    "start": "node dist/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anuchitorigin/node_udp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anuchitorigin/node_udp/issues"
+  },
+  "homepage": "https://github.com/anuchitorigin/node_udp#readme",
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.1.9",
+    "typescript": "^5.8.2"
+  }
+}
