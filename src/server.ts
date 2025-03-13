@@ -10,7 +10,7 @@ function calculate_crc(data: string) {
   return crc;
 }
 
-function decode_data_format(data: string) {
+function decode_data_format(name: string, data: string) {
   const alphanumeric = data.substring(0, 4);
   const scaletype = data.substring(4, 6);
   const unittype = data.substring(6, 8);
@@ -76,7 +76,7 @@ function decode_data_format(data: string) {
       // case '00': // RFU
       //   unit = '';
       //   break;
-      case '01': // Duty
+      case '01': // duty
         unit = '%';
         break;
       case '02': // pressure
@@ -95,7 +95,7 @@ function decode_data_format(data: string) {
         unit = 'J';
         break;
       case '07': // count
-        unit = 'count';
+        unit = 'time';
         break;
       case '08': // angular acceleration
         unit = 'rad/s2';
@@ -185,7 +185,7 @@ function decode_data_format(data: string) {
         unit = 'kg/s';
         break;
       case '25': // mass flow rate per unit area
-        unit = 'kg/m2*s';
+        unit = 'kg/(m2*s)';
         break;
       case '26': // frequency
         unit = 'Hz';
@@ -406,31 +406,43 @@ function decode_data_format(data: string) {
       // case '6E': // 0-5V sensor
       //   unit = '';
       //   break;
-      // case '6F': //
+      // case '6F': // thermocouple sensor
       //   unit = '';
       //   break;
-      // case '70': //
+      // case '70': // edge detect
       //   unit = ''; 
       //   break;
       case '71': // angle
         unit = 'rad';
         break;
-      case '72': // edge detect
+      case '72': // velocity
         unit = 'mm/s';
         break;
-      case '73': // angle
+      case '73': // displacement
         unit = 'mm'; 
         break;
       case '74': // velocity RMS
         unit = 'mm/s';
         break;
+      case '75': // analog sensor
+        unit = '';
+        break;
+      // case 'FA': // ID
+      //   unit = '';
+      //   break;
       case 'FB': // electrical resistance
         unit = 'kΩ';
         break;
+      // case 'FC': // send mode
+      //   unit = '';
+      //   break;
+      // case 'FD': // validation
+      //   unit = '';
+      //   break;
       // case 'FE': // range over
       //   unit = ''; 
       //   break;
-      // case 'FF': // no data
+      // case 'FF': // abnormal
       //   unit = '';
       //   break;
       default:
@@ -438,68 +450,48 @@ function decode_data_format(data: string) {
     }
   }
   return {
+    name: name,
     value: numeric,
     unit: unit,
   }
 }
 
 function read_CT(data: string) {
-  console.log(data)
-  const counter = decode_data_format(data.substring(0, 8));
-  const current1 = decode_data_format(data.substring(8, 16));
-  const current2 = decode_data_format(data.substring(16, 24));
-  const borrow = decode_data_format(data.substring(24, 32));
-  const prev_current1 = decode_data_format(data.substring(32, 40));
-  const prev_current2 = decode_data_format(data.substring(40, 48));
-  const prev_borrow = decode_data_format(data.substring(48, 56));
-  console.log(counter.value,counter.unit);
-  console.log(current1.value,current1.unit);
-  console.log(current2.value,current2.unit);
-  console.log(borrow.value,borrow.unit);
-  console.log(prev_current1.value,prev_current1.unit);
-  console.log(prev_current2.value,prev_current2.unit);
-  console.log(prev_borrow.value,prev_borrow.unit);
-  return true;
+  let fields = [];
+  fields.push(decode_data_format('packet_count',        data.substring(0, 8)));
+  fields.push(decode_data_format('current1',            data.substring(8, 16)));
+  fields.push(decode_data_format('current2',            data.substring(16, 24)));
+  fields.push(decode_data_format('harvest_status',      data.substring(24, 32)));
+  fields.push(decode_data_format('prev_current1',       data.substring(32, 40)));
+  fields.push(decode_data_format('prev_current2',       data.substring(40, 48)));
+  fields.push(decode_data_format('prev_harvest_status', data.substring(48, 56)));
+  return fields;
 }
 
 function read_Vibration_Velocity(data: string) {
-  console.log(data)
-  const peak_freq_accel1 = decode_data_format(data.substring(0, 8));
-  const peak_acceleration1 = decode_data_format(data.substring(8));
-  const peak_freq_accel2 = decode_data_format(data.substring(16, 24));
-  const peak_acceleration2 = decode_data_format(data.substring(24, 32));
-  const acceleration_rms = decode_data_format(data.substring(32, 40));
-  const peak_freq_velo1 = decode_data_format(data.substring(40, 48));
-  const peak_velocity1 = decode_data_format(data.substring(48, 56));
-  const peak_freq_velo2 = decode_data_format(data.substring(56, 64));
-  const peak_velocity2 = decode_data_format(data.substring(64, 72));
-  const peak_freq_velo3 = decode_data_format(data.substring(72, 80));
-  const peak_velocity3 = decode_data_format(data.substring(80, 88));
-  const velocity_rms = decode_data_format(data.substring(88, 96));
-  const kurtosis = decode_data_format(data.substring(96, 104));
-  const temperature = decode_data_format(data.substring(104, 112));
-  console.log(peak_freq_accel1.value,peak_freq_accel1.unit)
-  console.log(peak_acceleration1.value, peak_acceleration1.unit)
-  console.log(peak_freq_accel2.value, peak_freq_accel2.unit)
-  console.log(peak_acceleration2.value, peak_acceleration2.unit)
-  console.log(acceleration_rms.value, acceleration_rms.unit)
-  console.log(peak_freq_velo1.value, peak_freq_velo1.unit)
-  console.log(peak_velocity1.value, peak_velocity1.unit)
-  console.log(peak_freq_velo2.value, peak_freq_velo2.unit)
-  console.log(peak_velocity2.value, peak_velocity2.unit)
-  console.log(peak_freq_velo3.value, peak_freq_velo3.unit)
-  console.log(peak_velocity3.value, peak_velocity3.unit)
-  console.log(velocity_rms.value, velocity_rms.unit)
-  console.log(kurtosis.value, kurtosis.unit)
-  console.log(temperature.value, temperature.unit)
-  return true;
+  let fields = [];
+  fields.push(decode_data_format('freq1',         data.substring(0, 8)));
+  fields.push(decode_data_format('acc1',          data.substring(8, 16)));
+  fields.push(decode_data_format('freq2',         data.substring(16, 24)));
+  fields.push(decode_data_format('acc2',          data.substring(24, 32)));
+  fields.push(decode_data_format('acc_rms',       data.substring(32, 40)));
+  fields.push(decode_data_format('freq3',         data.substring(40, 48)));
+  fields.push(decode_data_format('velo1',         data.substring(48, 56)));
+  fields.push(decode_data_format('freq4',         data.substring(56, 64)));
+  fields.push(decode_data_format('velo2',         data.substring(64, 72)));
+  fields.push(decode_data_format('freq5',         data.substring(72, 80)));
+  fields.push(decode_data_format('velo3',         data.substring(80, 88)));
+  fields.push(decode_data_format('velo_rms',      data.substring(88, 96)));
+  fields.push(decode_data_format('kurtosis',      data.substring(96, 104)));
+  fields.push(decode_data_format('surface_temp',  data.substring(104, 112)));
+  return fields;
 }
 
 function extract_murata_data(data: string) {
   // -- Extract the data portions of the message
   // -- and pass them to the appropriate functions for processing
   const portions = data.split(' ');
-  console.log(portions);
+  // console.log(portions);
   // -- 1. Check Portion Length
   if (portions.length < 8) {
     return false;
@@ -508,16 +500,25 @@ function extract_murata_data(data: string) {
   if ((portions[0] !== 'ERXDATA') || (portions[2] !== '0000') || (portions[4] !== 'F000')) {
     return false;
   }
-  // -- 3. Check Payload length
+  // -- 3. Read Unit ID, Message ID, and RSSI
+  const unitid = portions[1];
+  const messageid = portions[3];
+  let rssi = parseInt(portions[5], 16);
+  if (Number.isNaN(rssi)) {
+    return false;
+  }
+  rssi -= 107; // dBm
+  // console.log('rssi=', rssi);
+  // -- 4. Check Payload length
   const payload_length = parseInt(portions[6], 16);
   if (Number.isNaN(payload_length)) {
     return false;
   }
-  console.log('payload_length=',payload_length);
+  // console.log('payload_length=',payload_length);
   if (portions[7].length != (payload_length + 2) ) { // +2 for the CRC
     return false;
   }
-  // -- 4. Check Overall CRC
+  // -- 5. Check Overall CRC
   const crc_all = parseInt(portions[7].slice(-2), 16); // Remove the CRC
   if (Number.isNaN(crc_all)) {
     return false;
@@ -528,11 +529,11 @@ function extract_murata_data(data: string) {
   if (crc_all != crc_all_cal) {
     return false;
   }
-  console.log('CRC OK');
-  // -- 5. Check Payload CRC
+  // console.log('CRC OK');
+  // -- 6. Check Payload CRC
   const remainder = payload_length % 8;
   if (remainder == 2) {
-    console.log('Payload length is a multiple of 8 + 2');
+    // console.log('Payload length is a multiple of 8 + 2');
     const crc_sub = parseInt(payload.slice(-2), 16); // Remove the CRC
     if (Number.isNaN(crc_sub)) {
       return false;
@@ -542,47 +543,65 @@ function extract_murata_data(data: string) {
     if (crc_sub != crc_sub_cal) {
       return false;
     }
-    console.log('Payload CRC OK');
+    // console.log('Payload CRC OK');
   }
+  // -- 7. Read Sensor Status
   const sensor_type = payload.substring(4, 6);
-  const battery_voltage = parseInt(payload.substring(8, 16), 16) / (SS_CONVERT * 100);
-  if (Number.isNaN(battery_voltage)) {
+  // console.log(`Sensor type: ${sensor_type}`);
+  const sensorstate = payload.substring(6, 8);
+  // console.log(`Sensor state: ${sensorstate}`);
+  const batteryvoltage = parseInt(payload.substring(8, 16), 16) / (SS_CONVERT * 100);
+  if (Number.isNaN(batteryvoltage)) {
     return false;
   }
-  console.log(`Battery voltage: ${battery_voltage.toFixed(2)} V`);
+  // console.log(`Battery voltage: ${batteryvoltage.toFixed(2)} V`);
+  // -- 8. Read Sensor Data
+  let sensortype = '';
   const sensor_data = payload.substring(16);
+  let data_chunks = null;
   switch (sensor_type) {
     case '01': // Temperature/Humidity
+      sensortype = '1AN';
       console.log('From Temperature/Humidity Sensor');
       break;
     case '10': // Current/Pulse (4-20mA) 
+      sensortype = '1MU';
       console.log('From Current/Pulse Sensor');
       break;
     case '13': // Voltage/Pulse (0-5V) 
+      sensortype = '1RU';
       console.log('From Voltage/Pulse Sensor');
       break;
     case '12': // CT
+      sensortype = '1MT/1NT';
       console.log('From CT Sensor');
-      read_CT(sensor_data);
+      data_chunks = read_CT(sensor_data);
       break;
     case '09': // Vibration（Acceleration）
+      sensortype = '1LZ';
       console.log('From Vibration Sensor');
       break;
     case '18': // Vibration（Acceleration/Velocity)
+      sensortype = '1TF';
       console.log('From Vibration/Velocity Sensor');
-      read_Vibration_Velocity(sensor_data);
+      data_chunks = read_Vibration_Velocity(sensor_data);
       break;
     default:
       // Unknown sensor type
       break;
   }
-  return true;
+  return {
+    unitid: unitid,
+    messageid: messageid,
+    rssi: rssi,
+    sensortype: sensortype,
+    sensorstate: sensorstate,
+    batteryvoltage: batteryvoltage,
+    data: data_chunks,
+  }
 }
 
 const server = dgram.createSocket('udp4');
-
-// const dgram = require('node:dgram');
-// const server = dgram.createSocket('udp4');
 
 server.on('error', (err) => {
   const now = new Date();
@@ -593,7 +612,7 @@ server.on('error', (err) => {
 server.on('message', (msg, rinfo) => {
   const now = new Date();
   console.log(`[${now.toLocaleString()}] server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
-  extract_murata_data(msg.toString());
+  console.log(extract_murata_data(msg.toString()));
 });
 
 server.on('listening', () => {
@@ -605,31 +624,30 @@ server.on('listening', () => {
 server.bind(55062);
 // Prints: server listening 0.0.0.0:55062
 
-// const loop = () => {
-//   const now = new Date();
-//   console.log(`[${now.toLocaleString()}] client is running...`);
-//   // creating a client socket
-//   var client = dgram.createSocket('udp4');
+const loop = () => {
+  const now = new Date();
+  console.log(`[${now.toLocaleString()}] client is running...`);
+  // creating a client socket
+  var client = dgram.createSocket('udp4');
 
-//   //buffer msg
-//   // var data = Buffer.from('SI\r\n');
-//   const data = [
-//     'ERXDATA 96F6 0000 2885 F000 26 4A 030312FF010A0532067E0007039D0539000105390000006803BF053900010539000000687D0E 96F6 7FFF\r\n',
-//     'ERXDATA 101E 0000 7734 F000 1F 82 03031800015C0532000500260006050C001900260003050C001305630019002600180572000F0026000E0572002D002600090572001B0574016905661D87052A7B08 101E 7FFF\r\n',
-//   ];
-//   const r = Math.random();
-//   console.log(r);
-//   const i = Math.round(r);
-//   //sending msg
-//   client.send(data[i], 55062, 'localhost', function(error) {
-//     if(error){
-//       client.close();
-//     }else{
-//       console.log('[OK] data sent.');
-//     }
-//   });
-//   setTimeout(loop, 5000);
-// }
+  //buffer msg
+  // var data = Buffer.from('SI\r\n');
+  const data = [
+    'ERXDATA 96F6 0000 2885 F000 26 4A 030312FF010A0532067E0007039D0539000105390000006803BF053900010539000000687D0E 96F6 7FFF\r\n',
+    'ERXDATA 101E 0000 7734 F000 1F 82 03031800015C0532000500260006050C001900260003050C001305630019002600180572000F0026000E0572002D002600090572001B0574016905661D87052A7B08 101E 7FFF\r\n',
+  ];
+  const r = Math.random();
+  const i = Math.round(r);
+  //sending msg
+  client.send(data[i], 55062, 'localhost', function(error) {
+    if(error){
+      client.close();
+    }else{
+      console.log('[OK] data sent.');
+    }
+  });
+  setTimeout(loop, 5000);
+}
 
-// loop();
+loop();
 
