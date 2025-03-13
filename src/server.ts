@@ -612,7 +612,8 @@ server.on('error', (err) => {
 server.on('message', (msg, rinfo) => {
   const now = new Date();
   console.log(`[${now.toLocaleString()}] server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
-  console.log(extract_murata_data(msg.toString()));
+  const decoded_data = extract_murata_data(msg.toString());
+  console.log(decoded_data);
 });
 
 server.on('listening', () => {
