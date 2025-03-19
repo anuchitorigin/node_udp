@@ -635,17 +635,20 @@ server.bind(55062);
 //   //buffer msg
 //   // var data = Buffer.from('SI\r\n');
 //   const data = [
-//     'ERXDATA 96F6 0000 2885 F000 26 4A 030312FF010A0532067E0007039D0539000105390000006803BF053900010539000000687D0E 96F6 7FFF\r\n',
-//     'ERXDATA 101E 0000 7734 F000 1F 82 03031800015C0532000500260006050C001900260003050C001305630019002600180572000F0026000E0572002D002600090572001B0574016905661D87052A7B08 101E 7FFF\r\n',
+//     'SI',
+//     'XKSREG S0E 1\r\n',
+//     // 'ERXDATA 96F6 0000 2885 F000 26 4A 030312FF010A0532067E0007039D0539000105390000006803BF053900010539000000687D0E 96F6 7FFF\r\n',
+//     // 'ERXDATA 101E 0000 7734 F000 1F 82 03031800015C0532000500260006050C001900260003050C001305630019002600180572000F0026000E0572002D002600090572001B0574016905661D87052A7B08 101E 7FFF\r\n',
 //   ];
 //   const r = Math.random();
 //   const i = Math.round(r);
 //   //sending msg
-//   client.send(data[i], 55062, 'localhost', function(error) {
+//   const msg = data[i];
+//   client.send(msg, 55061, '192.168.1.250', function(error) {
 //     if(error){
 //       client.close();
 //     }else{
-//       console.log('[OK] data sent.');
+//       console.log(`[${msg}] Message sent`);
 //     }
 //   });
 //   setTimeout(loop, 5000);
